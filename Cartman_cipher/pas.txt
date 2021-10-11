@@ -1,0 +1,233 @@
+//////////////////////////////////////////////////////////////
+
+
+procedure cartmancomp(si,st,key:string);
+var
+  FileIn,
+  FileOut : TFileStream;
+  Buffer,Dest  : array [0..15] of byte;
+  iv: array [0..15] of byte;
+  xbuf: array [0..15] of byte;
+  BlockSize: longword;
+  Left,I,N: Longint;
+  FName:string;
+  Hash: TDCP_Haval;
+  Hash2: TDCP_Sha512;
+  Hash3: TDCP_RipeMD128;
+  ctx: phelix_ctx;
+  digest: array[0..31] of byte;
+  digest2: array[0..63] of byte;
+
+var setup: procedure (key: pointer); stdcall;
+
+var crypt: procedure (froms: pointer); stdcall;
+
+var hdll: THandle;
+///////////
+
+
+begin
+//
+
+////////
+hdll:=LoadLibrary(pchar(dll+'libcartman.dll'));
+if hdll<>0 then begin
+setup:=windows.GetProcAddress(hdll,'setup');
+crypt:=windows.GetProcAddress(hdll,'crypt');
+if (@crypt=nil) or (@setup=nil)
+
+then begin
+showmessage('Functions not found!');
+end;
+end else showmessage('Cartman not loaded!');
+//
+
+
+    whashstring(key, @digest2);
+
+    for i:=0 to 12 do begin
+
+    Hash2:= TDCP_Sha512.Create(nil);
+    Hash2.Init;
+    Hash2.Update(digest2, 64);
+    Hash2.Final(Digest2);
+    Hash2.Free;
+
+    end;
+
+    Hash:= TDCP_Haval.Create(nil);
+    Hash.Init;
+    Hash.UpdateStr(key);
+    Hash.Final(Digest);
+    Hash.Free;
+
+
+
+  phelix_keysetup(ctx, @digest,256,128,56);
+  FillChar(iv,16,$FF);
+  phelix_ivsetup(ctx, @iv);
+  phelix_encrypt_bytes(ctx,@iv, @Dest,16);
+  system.Move(dest,iv,16);
+
+  Hash3:= TDCP_RipeMD128.Create(nil);
+  Hash3.Init;
+  Hash3.Update(iv, 16);
+  Hash3.Final(iv);
+  Hash3.Free;
+
+
+  prg:=0;
+  FileIn := TFileStream.Create(si,fmOpenRead or fmShareDenyWrite);
+  FileOut := TFileStream.Create(st, fmCreate);
+  Left := FileIn.Size;
+  FillChar(Buffer,16,0);
+  FillChar(Dest,16,0);
+
+ cartman.cartman_setkey (@digest2);
+// setup (@digest2);
+
+  repeat
+if left<16 then
+begin
+for n:=0 to 15 do buffer[n]:=random(256) xor rndtick;
+end;
+
+  blocksize:=16;
+  FileIn.Read(Buffer, blocksize);
+  XorBuff(@Buffer,@Iv,16,@XBuf);
+ cartman.cartman_crypt (@XBuf);
+//  crypt (@XBuf);
+  Move(xbuf,Iv,16);
+  FileOut.Write(xbuf, blocksize);
+  ShowPDP(pchar(si),blocksize);
+  dec(left,blocksize);
+until left<=0;
+
+
+///
+FileIn.Destroy;
+FileOut.Destroy;
+
+ if hdll<>0 then
+FreeLibrary(hdll);
+
+end;
+
+
+
+
+procedure cartmandcomp(si,st,key:string);
+var
+  FileIn,
+  FileOut : TFileStream;
+  Buffer,Dest  : array [0..15] of byte;
+  iv: array [0..15] of byte;
+  xbuf: array [0..15] of byte;
+  BlockSize: longword;
+  Left,I,N: Longint;
+  FName:string;
+  Hash: TDCP_Haval;
+  Hash2: TDCP_Sha512;
+  Hash3: TDCP_RipeMD128;
+  ctx: phelix_ctx;
+  digest: array[0..31] of byte;
+  digest2: array[0..63] of byte;
+
+var setup: procedure (key: pointer); stdcall;
+
+var decrypt: procedure (froms: pointer);stdcall;
+
+var hdll: THandle;
+///////////
+
+
+begin
+//
+
+////////
+hdll:=LoadLibrary(pchar(dll+'libcartman.dll'));
+if hdll<>0 then begin
+setup:=windows.GetProcAddress(hdll,'setup');
+decrypt:=windows.GetProcAddress(hdll,'decrypt');
+if (@decrypt=nil) or (@setup=nil)
+
+then begin
+showmessage('Functions not found!');
+end;
+end else showmessage('Cartman not loaded!');
+//
+//
+
+
+    whashstring(key, @digest2);
+
+    for i:=0 to 12 do begin
+
+    Hash2:= TDCP_Sha512.Create(nil);
+    Hash2.Init;
+    Hash2.Update(digest2, 64);
+    Hash2.Final(Digest2);
+    Hash2.Free;
+
+    end;
+
+    Hash:= TDCP_Haval.Create(nil);
+    Hash.Init;
+    Hash.UpdateStr(key);
+    Hash.Final(Digest);
+    Hash.Free;
+
+
+
+  phelix_keysetup(ctx, @digest,256,128,56);
+  FillChar(iv,16,$FF);
+  phelix_ivsetup(ctx, @iv);
+  phelix_encrypt_bytes(ctx,@iv, @Dest,16);
+  system.Move(dest,iv,16);
+
+  Hash3:= TDCP_RipeMD128.Create(nil);
+  Hash3.Init;
+  Hash3.Update(iv, 16);
+  Hash3.Final(iv);
+  Hash3.Free;
+
+
+  prg:=0;
+  FileIn := TFileStream.Create(si,fmOpenRead or fmShareDenyWrite);
+  FileOut := TFileStream.Create(st, fmCreate);
+  Left := FileIn.Size;
+  FillChar(Buffer,16,0);
+  FillChar(Dest,16,0);
+
+
+cartman.cartman_setkey(@digest2);
+
+//setup (@digest2);
+
+  repeat
+  blocksize:=16;
+  FileIn.Read(Buffer, blocksize);
+  Move(buffer,dest,16);
+//  decrypt (@Buffer);
+  cartman.cartman_decrypt(@buffer);
+  XorBuff(@Buffer,@Iv,16,@XBuf);
+  Move(dest,Iv,16);
+  FileOut.Write(XBuf, blocksize);
+  ShowPDP(pchar(si),blocksize);
+  dec(left,blocksize);
+until left<=0;
+
+
+///
+FileIn.Destroy;
+FileOut.Seek(arcrec.size,0);
+FileOut.Size:=arcrec.size;
+FileOut.Destroy;
+
+ if hdll<>0 then
+FreeLibrary(hdll);
+
+end;
+
+
+//////////////////////////////////////////////////////////////

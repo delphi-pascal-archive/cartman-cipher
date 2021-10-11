@@ -1,0 +1,25 @@
+!define BLANK ""
+D:\coding\darklib\tc_darkcrypt_mp\libcartman\cartman.obj : D:\coding\darklib&
+\tc_darkcrypt_mp\libcartman\cartman.c .AUTODEPEND
+ @D:
+ cd D:\coding\darklib\tc_darkcrypt_mp\libcartman
+ *wcc386 cartman.c -i=E:\watcom\h;E:\watcom\h\nt -w4 -e25 -zq -otexan -ob -o&
+l -ol+ -oc -oi -oa -or -om -bd -fp6 -6r -bt=nt -mf
+
+D:\coding\darklib\tc_darkcrypt_mp\libcartman\libcartman.dll : D:\coding\dark&
+lib\tc_darkcrypt_mp\libcartman\cartman.obj .AUTODEPEND
+ @D:
+ cd D:\coding\darklib\tc_darkcrypt_mp\libcartman
+ @%write libcartman.lk1 FIL cartman.obj
+ @%append libcartman.lk1 
+!ifneq BLANK ""
+ *wlib -q -n -b libcartman.imp 
+ @%append libcartman.lk1 LIBR libcartman.imp
+!endif
+!ifneq BLANK ""
+ @%append libcartman.lk1 op resource=
+!endif
+ *wlink name libcartman SYS nt_dll op m op NOSTDCall op maxe=25 op q op symf&
+ @libcartman.lk1
+ wlib -q -n -b libcartman.lib +libcartman.dll
+
